@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Load WHOIS API Key from .env
-WHOIS_API_KEY = "at_5sELHB4j22uteBfCqnDRbL9YST7nX"
+WHOIS_API_KEY = "at_IZqeqW3oeV2CSzTrMcStkw8x7Ub8Z"
 
 
 @app.route("/")
@@ -20,11 +20,15 @@ def home():
 
 
 # 1. Check domain availability
-@app.route("/check_domain", methods=["POST"])
+@app.route("/check_domain", methods=["POST", "GET"])
 def check_domain():
-    data = request.json
-    domain = data.get("domain")
-    print("✅ API Request received:", data)   # 👈 Will show in VS Code terminal
+    if request.method == "POST":
+        data = request.json
+        domain = data.get("domain")
+    else:  # GET request
+        domain = request.args.get("domain")  # get from URL query param
+
+    print("API Request received:", domain)
 
     if not domain:
         return jsonify({"error": "Domain is required"}), 400
@@ -39,7 +43,7 @@ def check_domain():
     response = requests.get(url, params=params)
     result = response.json()
 
-    available = "registryData" not in result  # Simple check
+    available = "registryData" not in result
 
     return jsonify({"domain": domain, "available": available})
 
